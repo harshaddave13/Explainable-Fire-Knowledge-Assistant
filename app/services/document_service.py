@@ -8,18 +8,25 @@ class DocumentService:
 
         reader = PdfReader(file_path)
 
-        text = ""
+        pages = []
+        total_characters = 0
 
-        for page in reader.pages:
+        for page_number, page in enumerate(reader.pages, start=1):
+
             page_text = page.extract_text()
 
             if page_text:
-                text += page_text + "\n"
+                pages.append({
+                    "page": page_number,
+                    "text": page_text
+                })
+
+                total_characters += len(page_text)
 
         return {
             "pages": len(reader.pages),
-            "characters": len(text),
-            "text": text
+            "characters": total_characters,
+            "page_content": pages
         }
 
 

@@ -29,9 +29,22 @@ async def upload_document(file: UploadFile = File(...)):
 
     result = document_service.extract_pdf(file_location)
 
-    chunks = document_service.chunk_text(result["text"])
+    chunks = []
 
-    stored_chunks = vector_service.store_chunks(chunks,file.filename)
+    for page in result["page_content"]:
+
+        page_chunks = document_service.chunk_text(page["text"])
+
+        for chunk in page_chunks:
+            chunks.append({
+                "text": chunk,
+                "page": page["page"]
+            })
+
+    stored_chunks = vector_service.store_chunks(
+        chunks,
+        file.filename
+    )
 
     return {
         "filename": file.filename,

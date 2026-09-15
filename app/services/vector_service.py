@@ -17,14 +17,16 @@ class VectorService:
             "all-MiniLM-L6-v2"
         )
 
-    def store_chunks(
-        self,
-        chunks: list[str],
-        filename: str
-    ) -> int:
+    def store_chunks(self,chunks: list[dict],filename: str) -> int:
+
+        # Extract only the text for embedding
+        documents = [
+            chunk["text"]
+            for chunk in chunks
+        ]
 
         embeddings = self.embedding_model.encode(
-            chunks
+            documents
         ).tolist()
 
         ids = [
@@ -35,14 +37,15 @@ class VectorService:
         metadatas = [
             {
                 "filename": filename,
+                "page": chunk["page"],
                 "chunk_index": index
             }
-            for index in range(len(chunks))
+            for index, chunk in enumerate(chunks)
         ]
 
         self.collection.upsert(
             ids=ids,
-            documents=chunks,
+            documents=documents,
             embeddings=embeddings,
             metadatas=metadatas
         )
