@@ -71,6 +71,7 @@ def ask_question(
     )
 
     documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
 
     context = "\n\n".join(documents)
 
@@ -79,8 +80,18 @@ def ask_question(
         context=context
     )
 
+    sources = []
+
+    for document, metadata in zip(documents, metadatas):
+        sources.append({
+            "filename": metadata["filename"],
+            "page": metadata["page"],
+            "chunk_index": metadata["chunk_index"],
+            "evidence": document
+        })
+
     return {
         "question": question,
         "answer": answer,
-        "sources": results["metadatas"][0]
+        "sources": sources
     }
