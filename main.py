@@ -72,6 +72,22 @@ def ask_question(
 
     documents = results["documents"][0]
     metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
+
+    # Best result has the lowest distance
+    best_distance = distances[0]
+
+    # Prototype relevance threshold.
+    # This value should be calibrated using evaluation data.
+    relevance_threshold = 0.8
+
+    if best_distance > relevance_threshold:
+        return {
+            "question": question,
+            "answer": "The supplied documents do not contain enough relevant information to answer this reliably.",
+            "sources": [],
+            "retrieval_status": "insufficient_evidence"
+        }
 
     context = "\n\n".join(documents)
 
@@ -82,7 +98,10 @@ def ask_question(
 
     sources = []
 
-    for document, metadata in zip(documents, metadatas):
+    for document, metadata in zip(
+        documents,
+        metadatas
+    ):
         sources.append({
             "filename": metadata["filename"],
             "page": metadata["page"],
@@ -93,5 +112,6 @@ def ask_question(
     return {
         "question": question,
         "answer": answer,
-        "sources": sources
+        "sources": sources,
+        "retrieval_status": "sufficient_evidence"
     }
